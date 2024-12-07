@@ -3,6 +3,7 @@ const app = express();
 const dotenv = require("dotenv");
 const mongoose = require("mongoose")
 const userRoute = require('./routes/user')
+const jobRoute = require('./routes/job')
 const bodyParser = require('body-parser')
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ app.get('/', (req, res) => {
 app.use(express.urlencoded({ extended:true }));
 app.use(bodyParser.json())
 app.use('/api/user', userRoute)
+app.use('/api/job', jobRoute)
 
 app.listen(port, () => {
     mongoose.connect(process.env.MONGODB_URL)

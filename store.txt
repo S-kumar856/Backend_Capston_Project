@@ -1,0 +1,4 @@
+
+1. first create the server and connect to the mongobd
+2. create the Schema
+3. create the route

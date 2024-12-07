@@ -17,7 +17,6 @@ router.post('/register', async (req, res) => {
     // hasing the password using gensalt and hash
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    // const token = await jwt.sign(password, SECRET_JW);
 
 //  creating new user if user doesnot exists
     try {
