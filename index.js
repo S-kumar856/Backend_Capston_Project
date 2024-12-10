@@ -1,11 +1,13 @@
 const express = require('express');
 const app = express();
 const dotenv = require("dotenv");
-const mongoose = require("mongoose")
-const userRoute = require('./routes/user')
-const jobRoute = require('./routes/job')
-const bodyParser = require('body-parser')
+const mongoose = require("mongoose");
+const userRoute = require('./routes/user');
+const jobRoute = require('./routes/job');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 dotenv.config();
+app.use(cors())
 const port = process.env.PORT || 3000;
 const path = require("path");
 

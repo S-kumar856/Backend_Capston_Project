@@ -10,6 +10,17 @@ dotenv.config();
 // reading the all jobs  (creating pagination using offset, limit)
 router.get('/', async (req, res) => {
     const { offset, limit, salary, name } = req.query;
+
+    // mongo query
+    const query = {};
+    if (salary){
+        query.salary = { $gte: salary, $lte: salary }
+    }
+
+    if(name){
+        query.companyName = {$regex: name, $options:"i"}
+    }
+
     // get me job with salary between 200 and 300
     //    {salary: { $gte: 200, $lte:300}} this code of searching with salary 
     // skip(offset).limit(limit) this code pagination 
@@ -19,9 +30,7 @@ router.get('/', async (req, res) => {
     // const jobs = await Job.find({salary}).skip(offset).limit(limit);
 
     // const jobs = await Job.find({companyName: { $regex: name, $options: "i"}}).skip(offset).limit(limit);
-    const jobs = await Job.find({companyName: { $regex: name, $options: "i"}, salary}).skip(offset).limit(limit);
-
-
+    const jobs = await Job.find(query).skip(offset || 0).limit(limit || 10);
     res.status(200).json(jobs)
 })
 
