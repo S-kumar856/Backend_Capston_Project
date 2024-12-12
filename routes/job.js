@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
     // const jobs = await Job.find({salary}).skip(offset).limit(limit);
 
     // const jobs = await Job.find({companyName: { $regex: name, $options: "i"}}).skip(offset).limit(limit);
-    const jobs = await Job.find(query).skip(offset || 0).limit(limit || 20);
+    const jobs = await Job.find(query).skip(offset || 0).limit(limit || 50);
     res.status(200).json(jobs)
 })
 
