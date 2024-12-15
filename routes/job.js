@@ -31,7 +31,8 @@ router.get('/', async (req, res) => {
 
     // const jobs = await Job.find({companyName: { $regex: name, $options: "i"}}).skip(offset).limit(limit);
     const jobs = await Job.find(query).skip(offset || 0).limit(limit || 50);
-    res.status(200).json(jobs)
+    const count = await Job.countDocuments(query);
+    res.status(200).json({jobs, count})
 })
 
 router.get('/:id', async (req, res) => {
@@ -59,7 +60,6 @@ router.delete('/:id',authMiddleware, async(req, res) => {
     }
     await Job.deleteMany({_id:id})
     res.status(200).json({message:"Job deleted"});
-
 })
 
 // creating the job
