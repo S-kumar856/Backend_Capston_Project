@@ -7,9 +7,9 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
 
-// reading the all jobs  (creating pagination using offset, limit)
+// reading the all jobs  (creating pagination using offset, limit and implementing search method)
 router.get('/', async (req, res) => {
-    const { offset, limit, salary, name } = req.query;
+    const { offset, limit, salary, name, skills } = req.query;
 
     // mongo query
     const query = {};
@@ -19,6 +19,14 @@ router.get('/', async (req, res) => {
 
     if(name){
         query.companyName = {$regex: name, $options:"i"}
+    }
+    if(skills){
+        // all skills must be in array
+        // query.skills = {$all: skills.split(",")};
+
+        // at least one skill must be in skills array
+        query.skills = {$in: skills.split(",")};
+
     }
 
     // get me job with salary between 200 and 300
@@ -65,9 +73,10 @@ router.delete('/:id',authMiddleware, async(req, res) => {
 // creating the job
 router.post('/', authMiddleware, async(req, res) => {
     const { companyName, jobPosition, salary, jobType, jobDescription, jobRequirements, location, skills, Company} = req.body;
-    if(!companyName || !jobPosition || !salary || !jobType){
+    if(!companyName || !jobPosition || !salary || !jobType || !skills){
         return res.status(400).json({message:"Missing required fields"})
     }
+    const skillsArray = skills.split(",").map((skill) => skill.trim());
     try {
         const user = req.user;
         const job = await Job.create({
@@ -78,7 +87,7 @@ router.post('/', authMiddleware, async(req, res) => {
             jobDescription,
             jobRequirements,
             location,
-            skills,
+            skills: skillsArray,
             Company,
             user: user.id,
         });
