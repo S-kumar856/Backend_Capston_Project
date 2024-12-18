@@ -32,6 +32,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
+
 //  login page
 router.post('/login', async (req, res) => {
     const {email, password} = req.body;
@@ -51,8 +52,15 @@ router.post('/login', async (req, res) => {
     }
     //  generating jsonwebtokens (tokens)
     const token = jwt.sign(payLoad, process.env.SECRET_JWT ,{
-        expiresIn: '1h',
-    });
+        expiresIn: '4h',});
+    res.cookie("token", token);
     res.status(200).json({token})
+});
+
+router.get('/logout', async (req, res) => {
+    res.clearCookie("token");
+    res.status(200).json({ message: 'Logged out successfully' });
 })
+
+
 module.exports = router;
