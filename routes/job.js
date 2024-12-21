@@ -9,23 +9,23 @@ dotenv.config();
 
 // reading the all jobs  (creating pagination using offset, limit and implementing search method)
 router.get('/', async (req, res) => {
-    const { offset, limit, salary, name, skills } = req.query;
+    const { offset, limit, name,  salary, skills } = req.query;
 
     // mongo query
     const query = {};
-    if (salary){
+    if (salary) {
         query.salary = { $gte: salary, $lte: salary }
     }
 
-    if(name){
-        query.companyName = {$regex: name, $options:"i"}
+    if (name) {
+        query.jobPosition = { $regex: name, $options: "i" }
     }
-    if(skills){
+    if (skills) {
         // all skills must be in array
         // query.skills = {$all: skills.split(",")};
 
         // at least one skill must be in skills array
-        query.skills = {$in: skills.split(",")};
+        query.skills = { $in: skills.split(",") };
 
     }
 
@@ -40,43 +40,47 @@ router.get('/', async (req, res) => {
     // const jobs = await Job.find({companyName: { $regex: name, $options: "i"}}).skip(offset).limit(limit);
     const jobs = await Job.find(query).skip(offset || 0).limit(limit || 50);
     const count = await Job.countDocuments(query);
-    res.status(200).json({jobs, count})
+    res.status(200).json({ jobs, count })
 })
 
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
     const job = await Job.findById(id)
-    if(!job){
-        return res.status(404).json({message: "Job not found"})
+    if (!job) {
+        return res.status(404).json({ message: "Job not found" })
     }
     res.status(200).json(job)
 });
 
 // delete the job
-router.delete('/:id',authMiddleware, async(req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
     const { id } = req.params;
     const job = await Job.findById(id);
-    const userId  = req.user.id;
+    const userId = req.user.id;
 
-    if(!job){
-        return res.status(404).json({message: "Job not found"})
+    if (!job) {
+        return res.status(404).json({ message: "Job not found" })
     }
 
-// check if the user is the owner of the job
-    if(userId !== job.user.toString()){   
-        return res.status(403).json({message: "You are not authorized to delete this job"})
+    // check if the user is the owner of the job
+    if (userId !== job.user.toString()) {
+        return res.status(403).json({ message: "You are not authorized to delete this job" })
     }
-    await Job.deleteMany({_id:id})
-    res.status(200).json({message:"Job deleted"});
+    await Job.deleteMany({ _id: id })
+    res.status(200).json({ message: "Job deleted" });
 })
 
 // creating the job
-router.post('/', authMiddleware, async(req, res) => {
-    const { companyName, jobPosition, salary, jobType, jobDescription, jobRequirements, location, skills, Company} = req.body;
-    if(!companyName || !jobPosition || !salary || !jobType || !skills){
-        return res.status(400).json({message:"Missing required fields"})
+router.post('/', authMiddleware, async (req, res) => {
+    const { companyName, jobPosition, salary, jobType, jobDescription, logoUrl, remote, location, skills, aboutCompany } = req.body;
+    if (!companyName || !jobPosition || !salary || !jobType || !skills || !jobDescription || !location || !aboutCompany || !logoUrl || !remote) {
+        return res.status(400).json({ message: "Missing required fields" })
     }
-    const skillsArray = skills.split(",").map((skill) => skill.trim());
+    // const skillsArray = skills.split(",").map((skill) => skill.trim());
+    // Ensure skills is a string before splitting
+    const skillsArray = Array.isArray(skills)
+        ? skills.map((skill) => skill.trim()) // If already an array, trim each item
+        : skills.split(",").map((skill) => skill.trim()); // If string, split and trim
     try {
         const user = req.user;
         const job = await Job.create({
@@ -85,50 +89,52 @@ router.post('/', authMiddleware, async(req, res) => {
             salary,
             jobType,
             jobDescription,
-            jobRequirements,
+            logoUrl,
+            remote,
+            aboutCompany,
             location,
             skills: skillsArray,
-            Company,
             user: user.id,
         });
         res.status(200).json(job);
-        
+
     } catch (err) {
         console.log(err)
-        res.status(500).json({message:"Error in creating a job"})
+        res.status(500).json({ message: "Error in creating a job" })
     }
 
 });
 
 // updating the job details
-router.put('/:id', authMiddleware, async(req,res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
     const { id } = req.params;
-    const { companyName, jobPosition, salary, jobType, jobDescription, jobRequirements, location, skills, Company } = req.body;
+    const { companyName, jobPosition, salary, jobType, jobDescription, remote, logoUrl, location, skills, aboutCompany } = req.body;
     const job = await Job.findById(id);
-    if(!job){
-        return res.status(404).json({message: "Job not found"})
+    if (!job) {
+        return res.status(404).json({ message: "Job not found" })
     }
-    if(job.user.toString() !== req.user.id){
-        return res.status(403).json({message: "You are not authorized to update this job"})
+    if (job.user.toString() !== req.user.id) {
+        return res.status(403).json({ message: "You are not authorized to update this job" })
     }
 
-    try{
-        await Job.findByIdAndUpdate(id,{
+    try {
+        await Job.findByIdAndUpdate(id, {
             companyName,
             jobPosition,
             salary,
             jobType,
             jobDescription,
-            jobRequirements,
+            remote,
+            logoUrl,
             location,
             skills,
-            Company,
+            aboutCompany,
         })
-        res.status(200).json({message:"Job Updated"});
+        res.status(200).json({ message: "Job Updated" });
     }
-    catch(err){
+    catch (err) {
         console.log(err)
-        return res.status(500).json({message:"Error in finding job"})
+        return res.status(500).json({ message: "Error in finding job" })
     }
 })
 

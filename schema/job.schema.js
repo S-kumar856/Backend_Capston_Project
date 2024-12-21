@@ -5,6 +5,10 @@ const jobSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    logoUrl:{
+        type:String,
+        required:true
+    },
     jobPosition: {
         type: String,
         required: true
@@ -16,7 +20,12 @@ const jobSchema = new mongoose.Schema({
     jobType:{
         type: String,
         required: true,
-        enum:["full-time","part-time","contract", "internship","freelance"]
+        enum:["full-time","part-time","contract", "internship","freelancer"]
+    },
+    remote:{
+        type:String,
+        required:true,
+        enum:["Home","Office","Hybrid"]
     },
     user:{
         type: mongoose.Schema.Types.ObjectId,
@@ -24,10 +33,6 @@ const jobSchema = new mongoose.Schema({
         required:true,
     },
     jobDescription:{
-        type:String,
-        required:true
-    },
-    jobRequirements:{
         type:String,
         required:true
     },
@@ -39,7 +44,7 @@ const jobSchema = new mongoose.Schema({
         type:Array,
         required:true
     },
-    Company:{
+   aboutCompany:{
         type:String,
         required:true
     },
